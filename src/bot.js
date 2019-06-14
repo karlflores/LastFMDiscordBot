@@ -41,7 +41,7 @@ client.on('message', async msg => {
 		// get the username
 		uname = msg.content.replace(/(!setFM)[\s]+/gmi,'')
 		uname = uname.replace(/[\n]*/g,'')
-		console.log(uname)
+		console.log('PARSED USERNAME: ', uname)
 		db.updateUsername({_id:msg.author.id, username:uname})
 	}
 	

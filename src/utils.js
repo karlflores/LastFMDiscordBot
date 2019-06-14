@@ -21,7 +21,6 @@ getNowPlaying = callback => user => {
 			success: data => {
 				npTrack = data.recenttracks.track[0]
 				if(npTrack['@attr'] != undefined && npTrack['@attr']){
-					console.log(npTrack)
 					getTrackScrobbles(user)(npTrack)(callback)
 				}else{
 					callback(null)
@@ -37,7 +36,7 @@ getNowPlaying = callback => user => {
 
 getTrackScrobbles = username => track => callback => {
 	method = 'track.getInfo'
-	console.log(track.name, track.artist['#text'])
+	console.log('Playing: ', track.name, track.artist['#text'])
 	options = {
 		track: track.name,
 		artist: track.artist['#text'],
@@ -61,8 +60,6 @@ getTrackScrobbles = username => track => callback => {
 	}
 	req = lastfm.request(method, options)
 }
-
-getNowPlaying('farlklores', console.log)
 
 module.exports = {
 	getNowPlaying

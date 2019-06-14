@@ -39,7 +39,7 @@ findUsername = (_id, callback) => {
 				console.error("No user found in the database")
 			
 			}
-			console.log(res.username)
+			console.log('FOUND IN DATABASE: ', res.username)
 			callback(res.username) 
 
 		
