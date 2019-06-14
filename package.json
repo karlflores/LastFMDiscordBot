@@ -1,0 +1,18 @@
+{
+  "name": "LastFMBot",
+  "version": "1.0.0",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "dev": "nodemon src/bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "dotenv": "^8.0.0",
+    "lastfm": "^0.9.3",
+    "mongodb": "^3.2.7"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.9"
+  }
+}
