@@ -24,7 +24,8 @@ const DATABASE = "LastFM"
 const server = 'mongodb://localhost:27017/timesheet' 
 
 // function to find all from a collection 
-findUsername = (_id, callback) => {
+// query in the form {_id} or {_username}
+findUsername = (query, callback) => {
 	_res = mongo.connect(uri, connectOptions, function(err, db) {
 		// error check first 
 		if (err) throw err;
@@ -33,7 +34,7 @@ findUsername = (_id, callback) => {
 		var dbo = db.db(DATABASE)
 		
 		// connect to the right collection and get an array of all messages 
-		dbo.collection(COLLECTION.usernames).findOne({_id}, (err, res) =>{
+		dbo.collection(COLLECTION.usernames).findOne(query, (err, res) =>{
 			if(err){
 				callback(null)
 				console.error("No user found in the database")
@@ -70,7 +71,12 @@ async function updateUsername(payload){
 			if(err.code === 11000){
 				// got here...
 				await dbo.collection(COLLECTION.usernames)
-						.updateOne(query,{$set:{username:payload.username}})
+						.updateOne(query,{$set:{username:payload.username, 
+												did:payload.did, 
+												discr:payload.discr					
+							}
+						
+						})
 				.then(res => {
 					console.log(`Updated ${payload._id} entry`);	
 				})

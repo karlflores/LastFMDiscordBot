@@ -34,15 +34,30 @@ client.on('message', async msg => {
 	uid = msg.author.id
 	console.log(`${uid} sent message`)
 		
-	if (msg.content === '!nowplaying'){
-		db.findUsername(msg.author.id, getNowPlaying(sendNowPlaying(msg)))
+	if (msg.content.search(/(\!nowplaying)/gmi)===0){
+		var firstMention = msg.mentions.members.first()
+		
+		// if the person has mentioned a user, find the user 
+		// in the DB 
+		if(firstMention){
+			db.findUsername({_id:firstMention.id}, getNowPlaying(sendNowPlaying(msg)))
+		}else{
+			// find the username in the message by finding the @tag
+			db.findUsername({_id:msg.author.id}, getNowPlaying(sendNowPlaying(msg)))
+		}
 		console.log(`${uid} sent message`)
+	
 	} else if (msg.content.search(/!setFM/) === 0){
 		// get the username
 		uname = msg.content.replace(/(!setFM)[\s]+/gmi,'')
 		uname = uname.replace(/[\n]*/g,'')
+		console.log(msg.author)
 		console.log('PARSED USERNAME: ', uname)
-		db.updateUsername({_id:msg.author.id, username:uname})
+		db.updateUsername({_id:msg.author.id, 
+				username:uname,
+				discr:msg.author.discriminator,
+				did:msg.author.username
+		})
 	}
 	
 })
