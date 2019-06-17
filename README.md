@@ -14,3 +14,5 @@ A simple bot that sends user stats in discord
 * Suggestions? 
 * music bot? 
 
+## Link to add to your discord xD 
+https://discordapp.com/api/oauth2/authorize?client_id=589174865601232926&permissions=0&scope=bot
