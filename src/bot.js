@@ -7,12 +7,13 @@ const utils = require('./utils.js')
 const client = new Discord.Client()
 
 // function to send the picture
-sendNowPlaying = msg => res => {
+sendNowPlaying = tag => msg => res => {
 	if(!res){
-		msg.reply("No track currently playing...")
+		msg.channel.send("<@"+tag.id+">"+" : No track currently playing...")
 	}else{
 	// send the message 
-		msg.reply(`*Currently Playing:* \n**Track:** ${res.name}\n**Album:** ${res.album}\n**Artist:** ${res.artist}\n\n**Scrobbles:** ${res.scrobbles}`, {files: [res.image[3]['#text']]})
+		console.log(tag.id)
+		msg.channel.send(`<@${tag.id}> : *Currently Playing:* \n**Track:** ${res.name}\n**Album:** ${res.album}\n**Artist:** ${res.artist}\n\n**Scrobbles:** ${res.scrobbles}`, {files: [res.image[3]['#text']]})
 	}
 }
 
@@ -40,10 +41,10 @@ client.on('message', async msg => {
 		// if the person has mentioned a user, find the user 
 		// in the DB 
 		if(firstMention){
-			db.findUsername({_id:firstMention.id}, getNowPlaying(sendNowPlaying(msg)))
+			db.findUsername({_id:firstMention.id}, getNowPlaying(sendNowPlaying(firstMention)(msg)))
 		}else{
 			// find the username in the message by finding the @tag
-			db.findUsername({_id:msg.author.id}, getNowPlaying(sendNowPlaying(msg)))
+			db.findUsername({_id:msg.author.id}, getNowPlaying(sendNowPlaying(msg.author)(msg)))
 		}
 		console.log(`${uid} sent message`)
 	
