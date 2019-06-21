@@ -34,6 +34,28 @@ getNowPlaying = callback => user => {
 	lastfm.request(method, options)
 }
 
+doesUserExist = user => callback => {
+	console.log('called this')
+	method = 'user.getInfo'
+	options = {
+		user,
+		handlers: {
+			success: data => {
+				// found a valid last fm user 
+				callback(uname)(true)
+			},
+			error : err => {
+				console.error(err)
+				if(err.error === 6){
+					callback(uname)(false)
+				}
+			}
+		}
+	}	
+	lastfm.request(method, options)
+
+}
+
 getTrackScrobbles = username => track => callback => {
 	method = 'track.getInfo'
 	console.log('Playing: ', track.name, track.artist['#text'])
@@ -62,5 +84,6 @@ getTrackScrobbles = username => track => callback => {
 }
 
 module.exports = {
+	doesUserExist,
 	getNowPlaying
 }

@@ -17,6 +17,21 @@ sendNowPlaying = tag => msg => res => {
 	}
 }
 
+usernameUpdate = msg => uname => validated => {
+	// update if it is validated 
+	if(validated){
+		console.log('last.fm username found: ', uname)
+		db.updateUsername({_id:msg.author.id, 
+				username:uname,
+				discr:msg.author.discriminator,
+				did:msg.author.username
+		})
+	}else{
+		console.log('last.fm username does not exist.')
+		msg.channel.send(`***${uname}*** does not exist.`)
+	}	
+}
+
 // login to the server that we want to connect to 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}`)
@@ -52,13 +67,10 @@ client.on('message', async msg => {
 		// get the username
 		uname = msg.content.replace(/(!setFM)[\s]+/gmi,'')
 		uname = uname.replace(/[\n]*/g,'')
-		console.log(msg.author)
 		console.log('PARSED USERNAME: ', uname)
-		db.updateUsername({_id:msg.author.id, 
-				username:uname,
-				discr:msg.author.discriminator,
-				did:msg.author.username
-		})
+		
+		// we need to validate the username
+		utils.doesUserExist(uname)(usernameUpdate(msg))
 	}
 	
 })
