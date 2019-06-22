@@ -34,7 +34,7 @@ getNowPlaying = callback => user => {
 	lastfm.request(method, options)
 }
 
-doesUserExist = user => callback => {
+validateUsername = user => callback => {
 	console.log('called this')
 	method = 'user.getInfo'
 	options = {
@@ -84,6 +84,6 @@ getTrackScrobbles = username => track => callback => {
 }
 
 module.exports = {
-	doesUserExist,
+	validateUsername,
 	getNowPlaying
 }

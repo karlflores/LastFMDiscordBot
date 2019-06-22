@@ -70,7 +70,7 @@ client.on('message', async msg => {
 		console.log('PARSED USERNAME: ', uname)
 		
 		// we need to validate the username
-		utils.doesUserExist(uname)(usernameUpdate(msg))
+		utils.validateUsername(uname)(usernameUpdate(msg))
 	}
 	
 })
