@@ -50,7 +50,7 @@ client.on('message', async msg => {
 	uid = msg.author.id
 	console.log(`${uid} sent message`)
 		
-	if (msg.content.search(/(\!nowplaying)/gmi)===0){
+	if (msg.content.search(/(\!nowplaying)/gmi)===0 || msg.content.search(/(\!np)/gmi)===0){
 		var firstMention = msg.mentions.members.first()
 		
 		// if the person has mentioned a user, find the user 
