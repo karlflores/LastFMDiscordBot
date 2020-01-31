@@ -50,7 +50,7 @@ client.on('message', async msg => {
 	uid = msg.author.id
 	console.log(`${uid} sent message`)
 		
-	if (msg.content.search(/(\!nowplaying)/gmi)===0 || msg.content.search(/(\!np)/gmi)===0){
+	if (msg.content.search(/(\.nowplaying)/gmi)===0 || msg.content.search(/(\.np)/gmi)===0){
 		var firstMention = msg.mentions.members.first()
 		
 		// if the person has mentioned a user, find the user 
@@ -63,9 +63,9 @@ client.on('message', async msg => {
 		}
 		console.log(`${uid} sent message`)
 	
-	} else if (msg.content.search(/!setFM/) === 0){
+	} else if (msg.content.search(/.setFM/) === 0){
 		// get the username
-		uname = msg.content.replace(/(!setFM)[\s]+/gmi,'')
+		uname = msg.content.replace(/(.setFM)[\s]+/gmi,'')
 		uname = uname.replace(/[\n]*/g,'')
 		console.log('PARSED USERNAME: ', uname)
 		
