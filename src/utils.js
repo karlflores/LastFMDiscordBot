@@ -1,9 +1,11 @@
 require('dotenv').config()
 var LastFMNode = require('lastfm').LastFmNode	
+const snekfetch = require('snekfetch')
 
 const lastfm = new LastFMNode({
 	api_key: process.env.LFM_API_KEY,
 	secret: process.env.LFM_SECRET
+
 })
 
 
@@ -81,9 +83,45 @@ getTrackScrobbles = username => track => callback => {
 		}
 	}
 	req = lastfm.request(method, options)
+	
+}
+
+getImage = async (subreddit, callback) => {
+	console.log('called ' + subreddit)
+	try{
+		const {body} = await snekfetch
+			.get('https://www.reddit.com/r/'+subreddit+ '.json?sort=top&t=day')
+			.query({limit:100});
+		
+		// filter the body so that only picture URLS are kept 
+
+		console.log(body)
+		if(body.data.children.length){
+			
+			// filter such that only image links are here 
+			filtered = body.data.children.filter(post => post.data.url.search(/(.jpg)|(.jpeg)|(.png)|(gif)/) > -1 )
+
+			if(filtered.length){
+				idx = Math.floor(Math.random() * filtered.length)
+				console.log(idx)
+				callback(filtered[idx])
+			
+			}else{
+				callback(null)
+			}
+		}else{
+			callback(null)
+		}
+	}catch(err){
+		return console.log(err)
+	}
+	console.log('finish')
+	
+
 }
 
 module.exports = {
 	validateUsername,
-	getNowPlaying
+	getNowPlaying,
+	getImage
 }

@@ -13,7 +13,23 @@ sendNowPlaying = tag => msg => res => {
 	}else{
 	// send the message 
 		console.log(tag.id)
-		msg.channel.send(`<@${tag.id}> : *Currently Playing:* \n**Track:** ${res.name}\n**Album:** ${res.album}\n**Artist:** ${res.artist}\n\n**Scrobbles:** ${res.scrobbles}`, {files: [res.image[3]['#text']]})
+		client.fetchUser(tag.id).then(user => {
+				const embed = new Discord.RichEmbed()
+				.setColor(0xA81E4F)
+				.setTitle(user.username+'\'s Currently Playing')
+				.addField('Track',`**${res.name}**`,true)
+				.addField('Album',`**${res.album}**`,true)
+				.addField('Scrobbles',`${res.scrobbles}`)
+				.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
+				.setImage(res.image[3]['#text'])
+				.setTimestamp()
+				console.log(user.username)
+				msg.channel.send(embed)
+		
+		}).catch(err => {
+			console.log(err)	
+		})
+
 	}
 }
 
@@ -23,7 +39,23 @@ sendNowPlayingByIDSmallPic = id => msg => res => {
 	}else{
 	// send the message 
 		console.log(id)
-		msg.channel.send(`<@${id}> : *Currently Playing:* \n**Track:** ${res.name}\n**Album:** ${res.album}\n**Artist:** ${res.artist}\n\n**Scrobbles:** ${res.scrobbles}`, {files: [res.image[2]['#text']]})
+		client.fetchUser(id).then(user => {
+				const embed = new Discord.RichEmbed()
+				.setColor(0xA81E4F)
+				.setTitle(user.username+'\'s Currently Playing')
+				.addField('Track',`**${res.name}**`,true)
+				.addField('Album',`**${res.album}**`,true)
+				.addField('Scrobbles',`${res.scrobbles}`)
+				.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
+				.setImage(res.image[3]['#text'])
+				.setTimestamp()
+				console.log(user.username)
+				msg.channel.send(embed)
+		
+		}).catch(err => {
+			console.log(err)	
+		})
+
 	}
 }
 
@@ -59,6 +91,8 @@ client.on('message', async msg => {
 	
 	uid = msg.author.id
 	console.log(`${uid} sent message`)
+	
+	// functionality to set all discord
 	if(msg.content.search(/.npall/gmi) === 0){
 		msg.member.guild.members.forEach(member=>{
 			if(member.user) {
@@ -87,6 +121,38 @@ client.on('message', async msg => {
 		
 		// we need to validate the username
 		utils.validateUsername(uname)(usernameUpdate(msg))
+	} else if(msg.content.search(/.pix/) === 0){
+		subreddit = msg.content.replace(/(.pix)[\s]+/gmi,'')
+		subreddit = subreddit.replace(/[\n]*/g,'')
+		console.log(subreddit)
+		getImage(subreddit,(image)=>{
+			if(!image){
+				return msg.channel.send("...finna no images to share...")
+			}
+			const embed = new Discord.RichEmbed()
+        	.setColor(0x00A2E8)
+        	.setTitle(image.data.title)
+			.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
+        	.setImage(image.data.url)
+			.setTimestamp()
+        	
+			msg.channel.send(embed)			
+		})
+
+
+	} else if(msg.content.search(/.help/) === 0){
+		const embed = new Discord.RichEmbed()
+        .setColor(0xEBA94D)
+		.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
+		.setThumbnail('https://i.imgur.com/xJvAZo0.png')
+		.setTitle('JuzzBot Help')
+		.addField('.np','Send through the track you are currently scrobbling')
+		.addField('.np @user','Send through the track a specific user is currently scrobbling')
+		.addField('.npall','Send through the tracks all registered users in the discord are currently scrobbling')
+		.addField('.setFM <lastfm_username>','Set your lastFM username to enable lastFM functionality')
+		.addField('.pix <subreddit>', 'Pull a random picture from a given subreddit')
+		msg.channel.send(embed)	
+		
 	}
 	
 })
