@@ -71,6 +71,12 @@ client.on('message', async msg => {
 		
 		// we need to validate the username
 		utils.validateUsername(uname)(usernameUpdate(msg))
+	} else if(msg.content.search(/.testpack/gmi) === 0){
+		msg.member.guild.members.forEach(member=>{
+			if(member.user) {
+				db.findUsername({_id:member.user.id}, getNowPlaying(sendNowPlaying(member.user.id)(msg)))
+			}
+		})
 	}
 	
 })

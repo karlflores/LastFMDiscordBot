@@ -23,6 +23,29 @@ const DATABASE = "LastFM"
 // this is for local mongodb development 
 const server = 'mongodb://localhost:27017/timesheet' 
 
+findAllActiveUsernameDiscord = (query, callback) => {
+	_res = mongo.connect(uri, connectOptions, function(err, db) {
+		// error check first 
+		if (err) throw err;
+
+		// get the right database 
+		var dbo = db.db(DATABASE)
+		
+		// connect to the right collection and get an array of all messages 
+		dbo.collection(COLLECTION.usernames).findOne(query, (err, res) =>{
+			if(err){
+				callback(null)
+				console.error("No user found in the database")
+			
+			}
+			console.log('FOUND IN DATABASE: ', res.username)
+			callback(res.username) 
+
+		
+		})
+	});		
+}
+
 // function to find all from a collection 
 // query in the form {_id} or {_username}
 findUsername = (query, callback) => {
