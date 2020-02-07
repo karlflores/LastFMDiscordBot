@@ -51,7 +51,10 @@ findAllActiveUsernameDiscord = (query, callback) => {
 findUsername = (query, callback) => {
 	_res = mongo.connect(uri, connectOptions, function(err, db) {
 		// error check first 
-		if (err) throw err;
+		if (err){
+			console.log(err)
+			throw err;
+		}
 
 		// get the right database 
 		var dbo = db.db(DATABASE)
@@ -63,9 +66,10 @@ findUsername = (query, callback) => {
 				console.error("No user found in the database")
 			
 			}
-			console.log('FOUND IN DATABASE: ', res.username)
-			callback(res.username) 
-
+			if(res){
+				console.log('FOUND IN DATABASE: ', res.username)
+				callback(res.username) 
+			}
 		
 		})
 	});		

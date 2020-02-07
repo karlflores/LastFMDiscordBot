@@ -17,6 +17,16 @@ sendNowPlaying = tag => msg => res => {
 	}
 }
 
+sendNowPlayingByIDSmallPic = id => msg => res => {
+	if(!res){
+		msg.channel.send("<@"+id+">"+" : No track currently playing...")
+	}else{
+	// send the message 
+		console.log(id)
+		msg.channel.send(`<@${id}> : *Currently Playing:* \n**Track:** ${res.name}\n**Album:** ${res.album}\n**Artist:** ${res.artist}\n\n**Scrobbles:** ${res.scrobbles}`, {files: [res.image[2]['#text']]})
+	}
+}
+
 usernameUpdate = msg => uname => validated => {
 	// update if it is validated 
 	if(validated){
@@ -49,8 +59,14 @@ client.on('message', async msg => {
 	
 	uid = msg.author.id
 	console.log(`${uid} sent message`)
-		
-	if (msg.content.search(/(\.nowplaying)/gmi)===0 || msg.content.search(/(\.np)/gmi)===0){
+	if(msg.content.search(/.npall/gmi) === 0){
+		msg.member.guild.members.forEach(member=>{
+			if(member.user) {
+				console.log(member.user)
+				db.findUsername({_id:member.user.id}, getNowPlaying(sendNowPlayingByIDSmallPic(member.user.id)(msg)))
+			}
+		})
+	} else if (msg.content.search(/(\.nowplaying)/gmi)===0 || msg.content.search(/(\.np)/gmi)===0){
 		var firstMention = msg.mentions.members.first()
 		
 		// if the person has mentioned a user, find the user 
@@ -71,12 +87,6 @@ client.on('message', async msg => {
 		
 		// we need to validate the username
 		utils.validateUsername(uname)(usernameUpdate(msg))
-	} else if(msg.content.search(/.testpack/gmi) === 0){
-		msg.member.guild.members.forEach(member=>{
-			if(member.user) {
-				db.findUsername({_id:member.user.id}, getNowPlaying(sendNowPlaying(member.user.id)(msg)))
-			}
-		})
 	}
 	
 })
