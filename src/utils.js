@@ -94,7 +94,6 @@ getImage = async (subreddit, callback) => {
 			.query({limit:100});
 		
 		// filter the body so that only picture URLS are kept 
-
 		console.log(body)
 		if(body.data.children.length){
 			
@@ -115,9 +114,6 @@ getImage = async (subreddit, callback) => {
 	}catch(err){
 		return console.log(err)
 	}
-	console.log('finish')
-	
-
 }
 
 module.exports = {

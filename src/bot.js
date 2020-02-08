@@ -7,35 +7,9 @@ const utils = require('./utils.js')
 const client = new Discord.Client()
 
 // function to send the picture
-sendNowPlaying = tag => msg => res => {
+sendNowPlaying = id => msg => res => {
 	if(!res){
 		msg.channel.send("<@"+tag.id+">"+" : No track currently playing...")
-	}else{
-	// send the message 
-		console.log(tag.id)
-		client.fetchUser(tag.id).then(user => {
-				const embed = new Discord.RichEmbed()
-				.setColor(0xA81E4F)
-				.setTitle(user.username+'\'s Currently Playing')
-				.addField('Track',`**${res.name}**`,true)
-				.addField('Album',`**${res.album}**`,true)
-				.addField('Scrobbles',`${res.scrobbles}`)
-				.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
-				.setImage(res.image[3]['#text'])
-				.setTimestamp()
-				console.log(user.username)
-				msg.channel.send(embed)
-		
-		}).catch(err => {
-			console.log(err)	
-		})
-
-	}
-}
-
-sendNowPlayingByIDSmallPic = id => msg => res => {
-	if(!res){
-		msg.channel.send("<@"+id+">"+" : No track currently playing...")
 	}else{
 	// send the message 
 		console.log(id)
@@ -46,7 +20,7 @@ sendNowPlayingByIDSmallPic = id => msg => res => {
 				.addField('Track',`**${res.name}**`,true)
 				.addField('Album',`**${res.album}**`,true)
 				.addField('Scrobbles',`${res.scrobbles}`)
-				.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
+				.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 				.setImage(res.image[3]['#text'])
 				.setTimestamp()
 				console.log(user.username)
@@ -79,9 +53,6 @@ client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}`)
 })
 
-// Here is where we verify the message contents. We need to 
-// ensure that the message is in the right format so that 
-// our parsing will work 
 client.on('message', async msg => {
 	// if the message does not belong to a user/guild do nothing 
 	if (!msg.guild) return;
@@ -92,24 +63,23 @@ client.on('message', async msg => {
 	uid = msg.author.id
 	console.log(`${uid} sent message`)
 	
-	// functionality to set all discord
+	// functionality to scrob all discord
 	if(msg.content.search(/.npall/gmi) === 0){
 		msg.member.guild.members.forEach(member=>{
 			if(member.user) {
 				console.log(member.user)
-				db.findUsername({_id:member.user.id}, getNowPlaying(sendNowPlayingByIDSmallPic(member.user.id)(msg)))
+				db.findUsername({_id:member.user.id}, getNowPlaying(sendNowPlaying(member.user.id)(msg)))
 			}
 		})
 	} else if (msg.content.search(/(\.nowplaying)/gmi)===0 || msg.content.search(/(\.np)/gmi)===0){
 		var firstMention = msg.mentions.members.first()
 		
-		// if the person has mentioned a user, find the user 
-		// in the DB 
+		// if the person has mentioned a user, find the user in the DB 
 		if(firstMention){
-			db.findUsername({_id:firstMention.id}, getNowPlaying(sendNowPlaying(firstMention)(msg)))
+			db.findUsername({_id:firstMention.id}, getNowPlaying(sendNowPlaying(firstMention.id)(msg)))
 		}else{
 			// find the username in the message by finding the @tag
-			db.findUsername({_id:msg.author.id}, getNowPlaying(sendNowPlaying(msg.author)(msg)))
+			db.findUsername({_id:msg.author.id}, getNowPlaying(sendNowPlaying(msg.author.id)(msg)))
 		}
 		console.log(`${uid} sent message`)
 	
@@ -125,14 +95,15 @@ client.on('message', async msg => {
 		subreddit = msg.content.replace(/(.pix)[\s]+/gmi,'')
 		subreddit = subreddit.replace(/[\n]*/g,'')
 		console.log(subreddit)
-		getImage(subreddit,(image)=>{
+
+		getImage(subreddit, image => {
 			if(!image){
-				return msg.channel.send("...finna no images to share...")
+				return msg.channel.send("**...finna no images to share...**")
 			}
 			const embed = new Discord.RichEmbed()
         	.setColor(0x00A2E8)
         	.setTitle(image.data.title)
-			.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
+			.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
         	.setImage(image.data.url)
 			.setTimestamp()
         	
@@ -143,9 +114,9 @@ client.on('message', async msg => {
 	} else if(msg.content.search(/.help/) === 0){
 		const embed = new Discord.RichEmbed()
         .setColor(0xEBA94D)
-		.setAuthor('JuzzBot','https://i.imgur.com/1DzHBNF.jpg')
+		.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 		.setThumbnail('https://i.imgur.com/xJvAZo0.png')
-		.setTitle('JuzzBot Help')
+		.setTitle('Juzzy Help')
 		.addField('.np','Send through the track you are currently scrobbling')
 		.addField('.np @user','Send through the track a specific user is currently scrobbling')
 		.addField('.npall','Send through the tracks all registered users in the discord are currently scrobbling')
@@ -157,8 +128,7 @@ client.on('message', async msg => {
 	
 })
 
-// when you add a memeber to the database, add them to the database, -- admin can set their callsign 
-
+// when you add a memeber to the database, add them to the database 
 client.on('guildMemberAdd', member => {
 	console.log(member)
 })
