@@ -94,7 +94,7 @@ getImage = async (subreddit, callback) => {
 			.query({limit:100});
 		
 		// filter the body so that only picture URLS are kept 
-		console.log(body)
+		//console.log(body)
 		if(body.data.children.length){
 			
 			// filter such that only image links are here 

@@ -7,8 +7,10 @@
     "dev": "nodemon src/bot.js"
   },
   "dependencies": {
+    "ansi-to-json": "^1.0.14",
     "discord.js": "^11.4.2",
     "dotenv": "^8.0.0",
+    "image-to-ascii": "^3.0.12",
     "lastfm": "^0.9.3",
     "mongodb": "^3.2.7",
     "snekfetch": "^4.0.4"

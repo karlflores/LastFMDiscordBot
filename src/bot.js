@@ -2,14 +2,17 @@ require('dotenv').config()
 const Discord = require('discord.js')
 const db = require('./database.js')
 const utils = require('./utils.js')
+const i2a = require('image-to-ascii')
+const fs = require('fs')
 
+const ansi2json = require('ansi-to-json')
 // create new discord client 
 const client = new Discord.Client()
 
 // function to send the picture
 sendNowPlaying = id => msg => res => {
 	if(!res){
-		msg.channel.send("<@"+tag.id+">"+" : No track currently playing...")
+		msg.channel.send("<@"+id+">"+" : No track currently playing...")
 	}else{
 	// send the message 
 		console.log(id)
@@ -107,7 +110,22 @@ client.on('message', async msg => {
         	.setImage(image.data.url)
 			.setTimestamp()
         	
-			msg.channel.send(embed)			
+			msg.channel.send(embed)	
+
+			i2a(image.data.url, (err,res) => {
+				if(err) console.log(err);
+
+				// process the ascii object
+				console.log(res.length)
+				fs.writeFile("output.file", JSON.stringify(ansi2json(res)), err => {
+					if(err) throw err;
+					console.log("wrote file");
+					
+				})
+
+				//msg.channel.send(res);
+
+			})
 		})
 
 
@@ -117,10 +135,10 @@ client.on('message', async msg => {
 		.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 		.setThumbnail('https://i.imgur.com/xJvAZo0.png')
 		.setTitle('Juzzy Help')
-		.addField('.np','Send through the track you are currently scrobbling')
-		.addField('.np @user','Send through the track a specific user is currently scrobbling')
-		.addField('.npall','Send through the tracks all registered users in the discord are currently scrobbling')
-		.addField('.setFM <lastfm_username>','Set your lastFM username to enable lastFM functionality')
+		.addField('.np','Display track currently playing (last.fm)')
+		.addField('.np @user','Display track currently playing for a specific user (last.fm)')
+		.addField('.npall','Display track currently playing for all registered users (last.fm)')
+		.addField('.setFM <lastfm_username>','Set your last.fm username to enable last.fm functionality')
 		.addField('.pix <subreddit>', 'Pull a random picture from a given subreddit')
 		msg.channel.send(embed)	
 		
