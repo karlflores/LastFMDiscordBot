@@ -15,6 +15,11 @@ const username = 'farlklores'
 // either pass the track payload if there is 
 // a currently playing track or null if there is not 
 getNowPlaying = callback => user => {
+	if(!user){
+		console.log("no user called")
+		return 
+	}
+	console.log("getNowPlaying called with: " + user)
 	method = 'user.getRecentTracks'
 	options = {
 		limit: 1,
@@ -29,6 +34,7 @@ getNowPlaying = callback => user => {
 				}
 			},
 			error : err => {
+				console.log("ERROR FROM GET NOW PLAYING")
 				console.error(err)
 			}
 		}
@@ -86,6 +92,31 @@ getTrackScrobbles = username => track => callback => {
 	
 }
 
+// spa
+getScrobbleNum = username => track => callback => {
+	method = 'track.getInfo'
+	console.log('Playing: ', track.name, track.artist)
+	options = {
+		track: track.name,
+		artist: track.artist,
+		username,
+		handlers: {
+			success: data => {
+				var payload = {
+					username,
+					name: data.track.name,
+					scrobbles: data.track.userplaycount,
+				}
+				callback(payload)
+			},
+			error: err => {
+				console.error(err)
+			}
+		}
+	}
+	req = lastfm.request(method, options)
+	
+}
 getImage = async (subreddit, callback) => {
 	console.log('called ' + subreddit)
 	try{
@@ -119,5 +150,6 @@ getImage = async (subreddit, callback) => {
 module.exports = {
 	validateUsername,
 	getNowPlaying,
-	getImage
+	getImage,
+	getScrobbleNum
 }

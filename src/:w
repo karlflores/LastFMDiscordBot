@@ -84,142 +84,27 @@ client.on('message', async msg => {
 
 				if(cache.get(member.user.id)){
 					getNowPlaying(sendNowPlaying(member.user.id)(msg))(cache.get(member.user.id))
-					console.log("fetch cache item... " + cache.get(member.user.id))
-				}else{
-					db.findUsername({_id:member.user.id}, cache, getNowPlaying(sendNowPlaying(member.user.id)(msg)))
-					console.log("set cache item... " + member.user.id)
 				}
+				db.findUsername({_id:member.user.id}, cache, getNowPlaying(sendNowPlaying(member.user.id)(msg)))
 			}
 		})
-	}else if(msg.content.search(/.npw/gmi) === 0){
-		console.log("NPW CALLED")
-		let authorTrack = null;
-		let mentionTrack = null;
-			
-		// after we get the author track, we can get the number of scrobs for the mentioned user
-		let getMentionScrobs = function(){
-			var firstMention = msg.mentions.members.first()
-			console.log(firstMention)
-			if(!firstMention){
-				const embed = new Discord.RichEmbed()
-				.setColor(0xA81E4F)
-				.setTitle("ERROR: Mention a user to compare scrobbles...")
-				.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
-				.setTimestamp()
-				msg.channel.send(embed)		
-			}else{
-				// if there is a user mentioned fetch lastFM username 
-				if(cache.get(firstMention.id)){
-					getScrobbleNum(cache.get(firstMention.id))(authorTrack)(res => {
-						mentionTrack = res;
-						console.log(res)
-
-						const embed = new Discord.RichEmbed()
-						.setColor(0xA81E4F)
-						.setTitle(msg.author.username+'\'s Currently Playing')
-						.addField('Track',`**${authorTrack.name}**`,true)
-						.addField('Album',`**${authorTrack.album}**`,true)
-						.addField('Artist',`**${authorTrack.artist}**`,true)
-						.addBlankField()
-						.setImage(authorTrack.image[3]['#text'])
-						.addField(`Scrobbles: ${msg.author.username}`,`${authorTrack.scrobbles}`,true)
-						.addField(`Scrobbles: ${firstMention.user.username}`,`${res.scrobbles}`,true)
-						.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
-						.setTimestamp()
-						msg.channel.send(embed)	
-						// now we can create the embed and send it 
-					})
-				}else{
-					// fetch author track and add to the scrob holder 
-					db.findUsername({_id:firstMention.id}, cache, username => {
-						// for the given user name find the track 
-						getScrobbleNum(username)(authorTrack)(res => {
-							mentionTrack = res;
-							console.log(res)
-								const embed = new Discord.RichEmbed()
-								.setColor(0xA81E4F)
-								.setTitle(msg.author.username+'\'s Currently Playing')
-								.addField('Track',`**${authorTrack.name}**`,true)
-								.addField('Album',`**${authorTrack.album}**`,true)
-								.addField('Artist',`**${authorTrack.artist}**`,true)
-								.addBlankField()
-								.setImage(authorTrack.image[3]['#text'])
-								.addField(`Scrobbles: ${msg.author.username}`,`${authorTrack.scrobbles}`,true)
-								.addField(`Scrobbles: ${firstMention.user.username}`,`${res.scrobbles}`,true)
-								.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
-								.setTimestamp()
-								msg.channel.send(embed)	
-						})
-					})
-
-				}
-				console.log(mentionTrack)
-				
-			}
-		}
-		// get the author's now playing track
-		if(cache.get(msg.author.id)){
-			getNowPlaying(res => {
-				if(!res){
-					const embed = new Discord.RichEmbed()
-					.setColor(0xA81E4F)
-					.setTitle(msg.author.username+': No track currently playing...')
-					.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
-					.setTimestamp()
-					msg.channel.send(embed)	
-					return;					
-				}
-				authorTrack = res;
-				getMentionScrobs()
-				
-				console.log(authorTrack)
-				console.log(mentionTrack)
-			})(cache.get(msg.author.id))
-		
-		}else{
-			// fetch author track and add to the scrob holder 
-			db.findUsername({_id:msg.author.id}, cache, getNowPlaying(res => {
-				authorTrack = res;
-				if(!res){
-					const embed = new Discord.RichEmbed()
-					.setColor(0xA81E4F)
-					.setTitle(msg.author.username+': No track currently playing...')
-					.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
-					.setTimestamp()
-					msg.channel.send(embed)	
-					return;					
-				}
-				getMentionScrobs();
-				console.log("AUTHOR")
-				console.log(authorTrack)
-				console.log("MENTIONED")
-				console.log(mentionTrack)
-			}))
-
-		}
 	} else if (msg.content.search(/(\.nowplaying)/gmi)===0 || msg.content.search(/(\.np)/gmi)===0){
-		console.log("NP CALLED")
 		var firstMention = msg.mentions.members.first()
 		
 		// if the person has mentioned a user, find the user in the DB 
 		if(firstMention){
 			if(cache.get(firstMention.id)){
-				getNowPlaying(sendNowPlaying(firstMention.id)(msg))(cache.get(firstMention.id))
-				console.log("fetch cache item... " + cache.get(firstMention.id))
+				getNowPlaying(sendNowPlaying(member.user.id)(msg))(cache.get(firstMention.id))
 				
 			}else{
 				db.findUsername({_id:firstMention.id}, cache, getNowPlaying(sendNowPlaying(firstMention.id)(msg)))
-				console.log("set cache item... " + firstMention.id)
 			}
 		}else{
 			// find the username in the message by finding the @tag
 			if(cache.get(msg.author.id)){
-				getNowPlaying(sendNowPlaying(msg.author.id)(msg))(cache.get(msg.author.id))
-				console.log("fetch cache item... " + cache.get(msg.author.id))
-			}else {
-				db.findUsername({_id:msg.author.id}, cache, getNowPlaying(sendNowPlaying(msg.author.id)(msg)))
-				console.log("set cache item... " + msg.author.id)
-			}
+				getNowPlaying(sendNowPlaying(member.user.id)(msg))(cache.get(cache.get(msg.author.id)))
+			}else
+			db.findUsername({_id:msg.author.id}, cache, getNowPlaying(sendNowPlaying(msg.author.id)(msg)))
 		}
 		console.log(`${uid} sent message`)
 	

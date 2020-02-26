@@ -34,21 +34,22 @@ findAllActiveUsernameDiscord = (query, callback) => {
 		// connect to the right collection and get an array of all messages 
 		dbo.collection(COLLECTION.usernames).findOne(query, (err, res) =>{
 			if(err){
-				callback(null)
 				console.error("No user found in the database")
-			
+				return			
 			}
-			console.log('FOUND IN DATABASE: ', res.username)
-			callback(res.username) 
-
-		
+			if(!res){	
+				callback(null)
+			}else{
+					console.log('FOUND IN DATABASE: ', res.username)
+					callback(res.username) 	
+			}
 		})
 	});		
 }
 
 // function to find all from a collection 
 // query in the form {_id} or {_username}
-findUsername = (query, callback) => {
+findUsername = (query, cache, callback) => {
 	_res = mongo.connect(uri, connectOptions, function(err, db) {
 		// error check first 
 		if (err){
@@ -69,6 +70,10 @@ findUsername = (query, callback) => {
 			if(res){
 				console.log('FOUND IN DATABASE: ', res.username)
 				callback(res.username) 
+				// add to cache 
+				cache.set(query._id, res.username)
+			}else{
+				callback(null)
 			}
 		
 		})
