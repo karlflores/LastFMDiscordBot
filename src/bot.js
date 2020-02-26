@@ -91,7 +91,7 @@ client.on('message', async msg => {
 				}
 			}
 		})
-	}else if(msg.content.search(/.npw/gmi) === 0){
+	}else if(msg.content.search(/.npc/gmi) === 0){
 		console.log("NPW CALLED")
 		let authorTrack = null;
 		let mentionTrack = null;
@@ -260,6 +260,7 @@ client.on('message', async msg => {
 		.addField('.np','Send through the track you are currently scrobbling')
 		.addField('.np @user','Send through the track a specific user is currently scrobbling')
 		.addField('.npall','Send through the tracks all registered users in the discord are currently scrobbling')
+		.addField('.npc @user','Send through the track you are currently scrobbling as well as the mentioned users scobble number for that track')
 		.addField('.setFM <lastfm_username>','Set your lastFM username to enable lastFM functionality')
 		.addField('.pix <subreddit>', 'Pull a random picture from a given subreddit')
 		msg.channel.send(embed)	
