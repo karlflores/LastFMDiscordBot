@@ -14,11 +14,13 @@ createTrackChartEmbed = (user, tracks) => {
 	.setTitle(user.username+'\'s Top Tracks')
 	.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 	.setTimestamp()
-
+	
+	message = "";
 	tracks.forEach(track => {
 		console.log(track)
-		embed.addField('-------',`${track['@attr'].rank}. **${track.name}**  - ${track.artist['#text']} | Scrobbles: ${track.playcount}`)
+		message += `${track['@attr'].rank}. **${track.name}**  - ${track.artist['#text']} | Scrobbles: ${track.playcount}\n\n`
 	})
+	embed.setDescription(message)
 	return embed	
 }
 createArtistChartEmbed = (user, artists) => {
@@ -27,10 +29,12 @@ createArtistChartEmbed = (user, artists) => {
 	.setTitle(user.username+'\'s Top Artists')
 	.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 	.setTimestamp()
+	message = "";
 
 	artists.forEach(artist => {
-		embed.addField('-------',`${artist['@attr'].rank}. **${artist.name}** | Scrobbles: ${artist.playcount}`)
+		message+= `${artist['@attr'].rank}. **${artist.name}** | Scrobbles: ${artist.playcount}\n\n`
 	})
+	embed.setDescription(message)
 	return embed	
 }
 
@@ -41,9 +45,11 @@ createAlbumChartEmbed = (user, albums) => {
 	.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 	.setTimestamp()
 
+	message = "";
 	albums.forEach(album => {
-		embed.addField('-------',`${album['@attr'].rank}. **${album.name}** - ${album.artist['#text']} | Scrobbles: ${album.playcount}`)
+		message += `${album['@attr'].rank}. **${album.name}** - ${album.artist['#text']} | Scrobbles: ${album.playcount}\n\n`
 	})
+	embed.setDescription(message)
 	return embed	
 }
 
@@ -53,7 +59,7 @@ sendNowPlaying = id => msg => res => {
 		client.fetchUser(id).then(user => {
 				const embed = new Discord.RichEmbed()
 				.setColor(0xA81E4F)
-				.setTitle(user.username+'\' : No track currently playing...')
+				.setTitle(user.username+' : No track currently playing...')
 				.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 				.setTimestamp()
 				console.log(user.username)
