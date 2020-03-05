@@ -32,7 +32,7 @@ createArtistChartEmbed = (user, artists) => {
 	message = "";
 
 	artists.forEach(artist => {
-		message+= `${artist['@attr'].rank}. **${artist.name}** | Scrobbles: ${artist.playcount}\n\n`
+		message += `${artist['@attr'].rank}. **${artist.name}** | Scrobbles: ${artist.playcount}\n\n`
 	})
 	embed.setDescription(message)
 	return embed	
