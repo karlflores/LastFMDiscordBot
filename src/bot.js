@@ -8,6 +8,45 @@ const LRUCache = require('./LRUCache.js')
 const client = new Discord.Client()
 const cache = new LRUCache();
 
+createTrackChartEmbed = (user, tracks) => {
+	const embed = new Discord.RichEmbed()
+	.setColor(0xA81E4F)
+	.setTitle(user.username+'\'s Top Tracks')
+	.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
+	.setTimestamp()
+
+	tracks.forEach(track => {
+		console.log(track)
+		embed.addField('-------',`${track['@attr'].rank}. **${track.name}**  - ${track.artist['#text']} | Scrobbles: ${track.playcount}`)
+	})
+	return embed	
+}
+createArtistChartEmbed = (user, artists) => {
+	const embed = new Discord.RichEmbed()
+	.setColor(0xA81E4F)
+	.setTitle(user.username+'\'s Top Artists')
+	.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
+	.setTimestamp()
+
+	artists.forEach(artist => {
+		embed.addField('-------',`${artist['@attr'].rank}. **${artist.name}** | Scrobbles: ${artist.playcount}`)
+	})
+	return embed	
+}
+
+createAlbumChartEmbed = (user, albums) => {
+	const embed = new Discord.RichEmbed()
+	.setColor(0xA81E4F)
+	.setTitle(user.username+'\'s Top Albums')
+	.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
+	.setTimestamp()
+
+	albums.forEach(album => {
+		embed.addField('-------',`${album['@attr'].rank}. **${album.name}** - ${album.artist['#text']} | Scrobbles: ${album.playcount}`)
+	})
+	return embed	
+}
+
 // function to send the picture
 sendNowPlaying = id => msg => res => {
 	if(!res){
@@ -99,7 +138,6 @@ client.on('message', async msg => {
 		// after we get the author track, we can get the number of scrobs for the mentioned user
 		let getMentionScrobs = function(){
 			var firstMention = msg.mentions.members.first()
-			console.log(firstMention)
 			if(!firstMention){
 				const embed = new Discord.RichEmbed()
 				.setColor(0xA81E4F)
@@ -112,7 +150,6 @@ client.on('message', async msg => {
 				if(cache.get(firstMention.id)){
 					getScrobbleNum(cache.get(firstMention.id))(authorTrack)(res => {
 						mentionTrack = res;
-						console.log(res)
 
 						const embed = new Discord.RichEmbed()
 						.setColor(0xA81E4F)
@@ -135,7 +172,6 @@ client.on('message', async msg => {
 						// for the given user name find the track 
 						getScrobbleNum(username)(authorTrack)(res => {
 							mentionTrack = res;
-							console.log(res)
 								const embed = new Discord.RichEmbed()
 								.setColor(0xA81E4F)
 								.setTitle(msg.author.username+'\'s Currently Playing')
@@ -153,7 +189,6 @@ client.on('message', async msg => {
 					})
 
 				}
-				console.log(mentionTrack)
 				
 			}
 		}
@@ -172,8 +207,6 @@ client.on('message', async msg => {
 				authorTrack = res;
 				getMentionScrobs()
 				
-				console.log(authorTrack)
-				console.log(mentionTrack)
 			})(cache.get(msg.author.id))
 		
 		}else{
@@ -190,10 +223,6 @@ client.on('message', async msg => {
 					return;					
 				}
 				getMentionScrobs();
-				console.log("AUTHOR")
-				console.log(authorTrack)
-				console.log("MENTIONED")
-				console.log(mentionTrack)
 			}))
 
 		}
@@ -223,6 +252,121 @@ client.on('message', async msg => {
 		}
 		console.log(`${uid} sent message`)
 	
+	} else if(msg.content.search(/.albums/) === 0){
+		var firstMention = msg.mentions.members.first()
+		
+		// if the person has mentioned a user, find the user in the DB 
+		if(firstMention){
+			if(cache.get(firstMention.id)){
+				getAlbumChart(res=>{
+					albums = res.weeklyalbumchart.album
+					albums = albums.filter( i => albums.indexOf(i) < 10)
+					msg.channel.send(createAlbumChartEmbed(firstMention.user, albums))
+				})(cache.get(firstMention.id))
+				
+			}else{
+				db.findUsername({_id:firstMention.id}, cache, getAlbumChart(res => {
+					albums = res.weeklyalbumchart.album
+					albums = albums.filter( i => albums.indexOf(i) < 10)
+					msg.channel.send(createAlbumChartEmbed(firstMention.user, albums))
+				}))
+			}
+		}else{
+			// find the username in the message by finding the @tag
+			if(cache.get(msg.author.id)){
+				getAlbumChart(res => { 		
+					albums = res.weeklyalbumchart.album
+					albums = albums.filter( i => albums.indexOf(i) < 10)
+					msg.channel.send(createAlbumChartEmbed(msg.author, albums))
+			})(cache.get(msg.author.id))
+				console.log("fetch cache item... " + cache.get(msg.author.id))
+			}else {
+				db.findUsername({_id:msg.author.id}, cache, getAlbumChart(res => {		
+						albums = res.weeklyalbumchart.album
+						albums = albums.filter( i => albums.indexOf(i) < 10)
+						msg.channel.send(createAlbumChartEmbed(msg.author, albums))
+				}))
+				console.log("set cache item... " + msg.author.id)
+			}
+		}
+		console.log(`${uid} sent message`)
+		
+	} else if(msg.content.search(/.artists/) === 0){
+		var firstMention = msg.mentions.members.first()
+		// if the person has mentioned a user, find the user in the DB 
+		if(firstMention){
+			if(cache.get(firstMention.id)){
+				getArtistChart(res=>{
+					artists = res.weeklyartistchart.artist
+					artists = artists.filter( i => artists.indexOf(i) < 10)
+					msg.channel.send(createArtistChartEmbed(firstMention.user, artists))
+				})(cache.get(firstMention.id))
+				
+			}else{
+				db.findUsername({_id:firstMention.id}, cache, getArtistChart(res => {
+					artists = res.weeklyartistchart.artist
+					artists = artists.filter( i => artists.indexOf(i) < 10)
+					msg.channel.send(createArtistChartEmbed(firstMention.user, artists))
+				}))
+			}
+		}else{
+			// find the username in the message by finding the @tag
+			if(cache.get(msg.author.id)){
+				getArtistChart(res=>{
+					artists = res.weeklyartistchart.artist
+					artists = artists.filter( i => artists.indexOf(i) < 10)
+					msg.channel.send(createArtistChartEmbed(msg.author, artists))
+			})(cache.get(msg.author.id))
+				console.log("fetch cache item... " + cache.get(msg.author.id))
+			}else {
+				db.findUsername({_id:msg.author.id}, cache, getArtistChart(res => {		
+					artists = res.weeklyartistchart.artist
+					artists = artists.filter( i => artists.indexOf(i) < 10)
+					msg.channel.send(createArtistChartEmbed(msg.author, artists))
+				}))
+				console.log("set cache item... " + msg.author.id)
+			}
+		}
+		console.log(`${uid} sent message`)
+
+	} else if(msg.content.search(/.tracks/) === 0){	
+		var firstMention = msg.mentions.members.first()
+		// if the person has mentioned a user, find the user in the DB 
+		if(firstMention){
+			if(cache.get(firstMention.id)){
+				getTrackChart(res=>{
+					tracks = res.weeklytrackchart.track
+					tracks = tracks.filter( i => tracks.indexOf(i) < 10)
+					msg.channel.send(createTrackChartEmbed(firstMention.user, tracks))
+				})(cache.get(firstMention.id))
+				
+			}else{
+				db.findUsername({_id:firstMention.id}, cache, getTrackChart(res => {
+					tracks = res.weeklytrackchart.track
+					tracks = tracks.filter( i => tracks.indexOf(i) < 10)
+					msg.channel.send(createTrackChartEmbed(firstMention.user, tracks))
+				}))
+			}
+		}else{
+			// find the username in the message by finding the @tag
+			if(cache.get(msg.author.id)){
+				getTrackChart(res=>{
+					tracks = res.weeklytrackchart.track
+					tracks = tracks.filter( i => tracks.indexOf(i) < 10)
+					msg.channel.send(createTrackChartEmbed(msg.author, tracks))
+			})(cache.get(msg.author.id))
+				console.log("fetch cache item... " + cache.get(msg.author.id))
+			}else {
+				db.findUsername({_id:msg.author.id}, cache, getTrackChart(res => {		
+					tracks = res.weeklytrackchart.track
+					tracks = tracks.filter( i => tracks.indexOf(i) < 10)
+					msg.channel.send(createTrackChartEmbed(msg.author, tracks))
+				}))
+				console.log("set cache item... " + msg.author.id)
+			}
+		}
+		console.log(`${uid} sent message`)
+
 	} else if (msg.content.search(/.setFM/) === 0){
 		// get the username
 		uname = msg.content.replace(/(.setFM)[\s]+/gmi,'')

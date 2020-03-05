@@ -92,6 +92,55 @@ getTrackScrobbles = username => track => callback => {
 	
 }
 
+getTrackChart = callback => user => {
+	method = 'user.getWeeklyTrackChart'
+	options = {
+			user,
+		handlers: {
+			success: data => {
+				callback(data)
+			},
+			error: err => {
+				console.error(err)
+			}
+		}
+	}
+	req = lastfm.request(method, options)	
+}
+
+getArtistChart = callback => user => {
+	method = 'user.getWeeklyArtistChart'
+	options = {
+			user,
+		handlers: {
+			success: data => {
+				console.log(data)
+				callback(data)
+			},
+			error: err => {
+				console.error(err)
+			}
+		}
+	}
+	req = lastfm.request(method, options)	
+}
+
+getAlbumChart = callback => user => {
+	method = 'user.getWeeklyAlbumChart'
+	options = {
+			user,
+		handlers: {
+			success: data => {
+				callback(data)
+			},
+			error: err => {
+				console.error(err)
+			}
+		}
+	}
+	req = lastfm.request(method, options)	
+}
+
 // spa
 getScrobbleNum = username => track => callback => {
 	method = 'track.getInfo'
@@ -150,6 +199,9 @@ getImage = async (subreddit, callback) => {
 module.exports = {
 	validateUsername,
 	getNowPlaying,
+	getAlbumChart,
+	getArtistChart,
+	getTrackChart,
 	getImage,
 	getScrobbleNum
 }
