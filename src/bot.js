@@ -450,13 +450,31 @@ generate_spaces = num => {
 	return string;
 }
 
+evaluate_country = (country,i) => {
+		var total = 0;
+		for(j = 0 ; j < country.length && country.length > 1 ; j++){
+			if(country[j] == i.country.toLowerCase()[j]){
+				if( j == 0) total+=4
+				else total++
+			}
+		}
+		
+		if(i.country.toLowerCase().search(country) > -1){
+				console.log('match ' + i.country)
+				total += country.length
+		}
+
+		return total - fastLev.get(country, i.country.toLowerCase())
+
+}
+
 find_covid_country_stat = (country, table) => {
 
 	// find the best countries 
 	
 	const ascii_table_end = "+----------------+---------+--------+--------+---------+\n"
 	const ascii_table_headers = "| COUNTRY        | CASES   | +cases | DEATHS | +deaths |\n"
-	const ascii_title = "|                      COVID-19                     |\n"
+	const ascii_title = "|                       COVID-19                       |\n"
 	const spaces = {
 		country: 14,
 		cases: 7,
@@ -467,24 +485,16 @@ find_covid_country_stat = (country, table) => {
 	var rows;
 	// find the country 
 	
-	rows = table.filter(i => {
-				var total = 0;
-				for(j = 0 ; j < country.length && country.length > 1 ; j++){
-					if(country[j] == i.country.toLowerCase()[j]){
-						if( j == 0 || j == 1) total+= 2
-						else total++
-					}
-				}
-				
-				if(i.country.toLowerCase().search(country) > -1){
-						console.log('match')
-						total += country.length
-				}
-				return total >= country.length;		
-		}).filter(i => fastLev.get(i.country.toLowerCase(), country) < 4)
+	rows = table.sort((i,j) => {
+			res1 = evaluate_country(country,i) 
+			res2 = evaluate_country(country,j)
+			if(res1 < res2) return 1
+			else if(res1 === res2) return 0
+			else return -1
+		})
+	rows = rows.filter( i => rows.indexOf(i) < 2)
 
 	if(rows.length == 0) rows = table.filter(i => fastLev.get(i.country.toLowerCase(), country) < 5)
-	rows = rows.filter( i => rows.indexOf(i) < 3)
 	
 	// if there is a country that matches the country, then we will use that country 
 	
@@ -516,11 +526,11 @@ find_covid_country_stat = (country, table) => {
 create_covid_ascii_table = table => {
 	rows = table.filter( i => table.indexOf(i) < 20);
 
-	const ascii_table_end = "+-------------+---------+--------+--------+---------+\n"
-	const ascii_table_headers = "| COUNTRY     | CASES   | +cases | DEATHS | +deaths |\n"
-	const ascii_title = "|                      COVID-19                     |\n"
+	const ascii_table_end = "+----------------+---------+--------+--------+---------+\n"
+	const ascii_table_headers = "| COUNTRY        | CASES   | +cases | DEATHS | +deaths |\n"
+	const ascii_title = "|                       COVID-19                       |\n"
 	const spaces = {
-		country: 11,
+		country: 14,
 		cases: 7,
 		d_cases: 6,
 		deaths:6,
