@@ -7,11 +7,15 @@
     "dev": "nodemon src/bot.js"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
     "discord.js": "^11.4.2",
     "dotenv": "^8.0.0",
+    "fast-levenshtein": "^2.0.6",
     "lastfm": "^0.9.3",
     "mongodb": "^3.2.7",
-    "snekfetch": "^4.0.4"
+    "node-fetch": "^2.6.0",
+    "snekfetch": "^4.0.4",
+    "string-similarity": "^4.0.1"
   },
   "devDependencies": {
     "nodemon": "^1.18.9"

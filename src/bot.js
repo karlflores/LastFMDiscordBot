@@ -3,6 +3,7 @@ const Discord = require('discord.js')
 const db = require('./database.js')
 const utils = require('./utils.js')
 const LRUCache = require('./LRUCache.js')
+const fastLev = require('fast-levenshtein')
 
 // create new discord client 
 const client = new Discord.Client()
@@ -401,6 +402,30 @@ client.on('message', async msg => {
 		})
 
 
+	} else if(msg.content.search(/.covid/) === 0){
+		console.log("finding stats....")
+		utils.getCovidOverview(res => {
+			table = create_covid_ascii_table(res)
+			console.log(table)
+			console.log(table.length)
+			const b = '```'
+			msg.channel.send(`${b}prolog\n${table}${b}`)
+		})
+
+	} else if(msg.content.search(/.cvc/) === 0){
+		// get the username
+		country = msg.content.replace(/(.cvc)[\s]+/gmi,'')
+		country = country.replace(/[\n]*/g,'')
+		console.log('PARSED USERNAME: ', country)
+		utils.getCovidOverview(res => {
+			table = find_covid_country_stat(country,res)
+			console.log(table)
+			console.log(table.length)
+			const b = '```'
+			msg.channel.send(`${b}prolog\n${table}${b}`)
+		})
+
+		// now we need to go through each of the countrys in the table and print the result out	
 	} else if(msg.content.search(/.help/) === 0){
 		const embed = new Discord.RichEmbed()
         .setColor(0xEBA94D)
@@ -419,6 +444,132 @@ client.on('message', async msg => {
 	
 })
 
+generate_spaces = num => {
+	string = ''
+	for(i = 0 ; i < num ; i++) string += ' '
+	return string;
+}
+
+find_covid_country_stat = (country, table) => {
+
+	// find the best countries 
+	
+	const ascii_table_end = "+----------------+---------+--------+--------+---------+\n"
+	const ascii_table_headers = "| COUNTRY        | CASES   | +cases | DEATHS | +deaths |\n"
+	const ascii_title = "|                      COVID-19                     |\n"
+	const spaces = {
+		country: 14,
+		cases: 7,
+		d_cases: 6,
+		deaths:6,
+		d_deaths:7
+	}
+	var rows;
+	// find the country 
+	
+	rows = table.filter(i => {
+				var total = 0;
+				for(j = 0 ; j < country.length && country.length > 1 ; j++){
+					if(country[j] == i.country.toLowerCase()[j]){
+						if( j == 0 || j == 1) total+= 2
+						else total++
+					}
+				}
+				
+				if(i.country.toLowerCase().search(country) > -1){
+						console.log('match')
+						total += country.length
+				}
+				return total >= country.length;		
+		}).filter(i => fastLev.get(i.country.toLowerCase(), country) < 4)
+
+	if(rows.length == 0) rows = table.filter(i => fastLev.get(i.country.toLowerCase(), country) < 5)
+	rows = rows.filter( i => rows.indexOf(i) < 3)
+	
+	// if there is a country that matches the country, then we will use that country 
+	
+
+	
+	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
+	rows.forEach(r => {
+		ascii_table += "| " 
+		ascii_table += r.country;
+		ascii_table += generate_spaces(spaces.country - r.country.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.cases;
+		ascii_table += generate_spaces(spaces.cases - r.cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.new_cases;
+		ascii_table += generate_spaces(spaces.d_cases - r.new_cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.deaths;
+		ascii_table += generate_spaces(spaces.deaths - r.deaths.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.new_deaths;
+		ascii_table += generate_spaces(spaces.d_deaths - r.new_deaths.length) + ' '
+		ascii_table += "|\n"
+	})
+	ascii_table += ascii_table_end
+	console.log(ascii_table.length)
+	return ascii_table;
+}
+create_covid_ascii_table = table => {
+	rows = table.filter( i => table.indexOf(i) < 20);
+
+	const ascii_table_end = "+-------------+---------+--------+--------+---------+\n"
+	const ascii_table_headers = "| COUNTRY     | CASES   | +cases | DEATHS | +deaths |\n"
+	const ascii_title = "|                      COVID-19                     |\n"
+	const spaces = {
+		country: 11,
+		cases: 7,
+		d_cases: 6,
+		deaths:6,
+		d_deaths:7
+	}
+	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
+	rows.forEach(r => {
+		ascii_table += "| " 
+		ascii_table += r.country;
+		ascii_table += generate_spaces(spaces.country - r.country.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.cases;
+		ascii_table += generate_spaces(spaces.cases - r.cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.new_cases;
+		ascii_table += generate_spaces(spaces.d_cases - r.new_cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.deaths;
+		ascii_table += generate_spaces(spaces.deaths - r.deaths.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.new_deaths;
+		ascii_table += generate_spaces(spaces.d_deaths - r.new_deaths.length) + ' '
+		ascii_table += "|\n"
+	})
+	ascii_table += ascii_table_end
+	var r = table[table.length -1]
+		ascii_table += "| " 
+		ascii_table += r.country;
+		ascii_table += generate_spaces(spaces.country - r.country.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.cases;
+		ascii_table += generate_spaces(spaces.cases - r.cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.new_cases;
+		ascii_table += generate_spaces(spaces.d_cases - r.new_cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.deaths;
+		ascii_table += generate_spaces(spaces.deaths - r.deaths.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.new_deaths;
+		ascii_table += generate_spaces(spaces.d_deaths - r.new_deaths.length) + ' '
+		ascii_table += "|\n"
+	ascii_table += ascii_table_end
+	
+	console.log(ascii_table.length)
+	return ascii_table;
+}
+
+console.log(fastLev.get('korea','s. korea'))
 // when you add a memeber to the database, add them to the database 
 client.on('guildMemberAdd', member => {
 	console.log(member)

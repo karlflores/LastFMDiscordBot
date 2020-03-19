@@ -1,6 +1,8 @@
 require('dotenv').config()
+const cheerio = require('cheerio')
 var LastFMNode = require('lastfm').LastFmNode	
 const snekfetch = require('snekfetch')
+const fetch = require('node-fetch')
 
 const lastfm = new LastFMNode({
 	api_key: process.env.LFM_API_KEY,
@@ -196,6 +198,29 @@ getImage = async (subreddit, callback) => {
 	}
 }
 
+getCovidOverview = async function(callback){
+	try{
+		fetch('https://www.worldometers.info/coronavirus/')
+					.then( res => res.text())
+					.then(res => {
+			const $ = cheerio.load(res)
+			const result = $("#main_table_countries_today").find('tr').map((i,element) => ({
+				country: $(element).find('td:nth-of-type(1)').text().trim(),
+				cases: $(element).find('td:nth-of-type(2)').text().trim(),
+				new_cases: $(element).find('td:nth-of-type(3)').text().trim(),
+				deaths: $(element).find('td:nth-of-type(4)').text().trim(),
+				new_deaths: $(element).find('td:nth-of-type(5)').text().trim(),	
+			})).get()
+
+			callback(result.filter( i => result.indexOf(i) > 0));
+		})
+
+	}catch(err){
+		return console.log(err);
+	}
+}
+
+
 module.exports = {
 	validateUsername,
 	getNowPlaying,
@@ -203,5 +228,6 @@ module.exports = {
 	getArtistChart,
 	getTrackChart,
 	getImage,
-	getScrobbleNum
+	getScrobbleNum,
+	getCovidOverview
 }
