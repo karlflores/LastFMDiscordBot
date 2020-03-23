@@ -467,7 +467,7 @@ client.on('message', async msg => {
 		.addField('.npc @user','Send through the track you are currently scrobbling as well as the mentioned users scobble number for that track')
 		.addField('.tracks !<@user>','Get the top 10 tracks for a given user [default: message sender]')
 		.addField('.albums !<@user>','Get the top 10 albums for a given user [default: message sender]')
-		.addField('.artists @opt<@user>','Get the top 10 artists for a given user [default: message sender]')
+		.addField('.artists !<@user>','Get the top 10 artists for a given user [default: message sender]')
 		.addField('.setFM <lastfm_username>','Set your lastFM username to enable lastFM functionality')
 		.addField('.pix <subreddit>', 'Pull a random picture from a given subreddit')
 		.addField('.covid', 'Get the a table if the current COVID-19 statistics')
