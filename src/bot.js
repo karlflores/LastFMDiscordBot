@@ -4,10 +4,19 @@ const db = require('./database.js')
 const utils = require('./utils.js')
 const LRUCache = require('./LRUCache.js')
 const fastLev = require('fast-levenshtein')
-
+const fs = require('fs')
 // create new discord client 
 const client = new Discord.Client()
 const cache = new LRUCache();
+
+
+// load the countries json object
+countries_str = fs.readFileSync('./src/countries.json')
+countries = JSON.parse(countries_str)
+country_dict = {}
+countries.forEach( c => {
+	country_dict[c.name.common] = c	
+})
 
 createTrackChartEmbed = (user, tracks) => {
 	const embed = new Discord.RichEmbed()
@@ -402,6 +411,15 @@ client.on('message', async msg => {
 		})
 
 
+	} else if(msg.content.search(/.covidm/) === 0){
+		console.log("finding stats....")
+		utils.getCovidOverview(res => {
+			table = create_covid_mobile_table(res)
+			console.log(table)
+			console.log(table.length)
+			const b = '```'
+			msg.channel.send(`${b}prolog\n${table}${b}`)
+		})
 	} else if(msg.content.search(/.covid/) === 0){
 		console.log("finding stats....")
 		utils.getCovidOverview(res => {
@@ -419,6 +437,18 @@ client.on('message', async msg => {
 		console.log('PARSED USERNAME: ', country)
 		utils.getCovidOverview(res => {
 			table = find_covid_country_stat(country,res)
+			console.log(table)
+			console.log(table.length)
+			const b = '```'
+			msg.channel.send(`${b}prolog\n${table}${b}`)
+		})
+	} else if(msg.content.search(/.cvr/) === 0){
+		// get the username
+		country = msg.content.replace(/(.cvr)[\s]+/gmi,'')
+		country = country.replace(/[\n]*/g,'')
+		console.log('PARSED USERNAME: ', country)
+		utils.getCovidOverview(res => {
+			table = find_covid_region_stat(country,res)
 			console.log(table)
 			console.log(table.length)
 			const b = '```'
@@ -452,9 +482,10 @@ generate_spaces = num => {
 
 evaluate_country = (country,i) => {
 		var total = 0;
+		var incr = 30;
 		for(j = 0 ; j < country.length && country.length > 1 ; j++){
 			if(country[j] == i.country.toLowerCase()[j]){
-				if( j == 0) total+=4
+				if( j == 0) total+=(30-j)
 				else total++
 			}
 		}
@@ -466,6 +497,124 @@ evaluate_country = (country,i) => {
 
 		return total - fastLev.get(country, i.country.toLowerCase())
 
+}
+
+find_countries_region = (region) => {
+	res = [] 
+	Object.keys(country_dict).forEach(key => {
+		if(country_dict[key].name.common == "United States") country = "USA"
+		else if(country_dict[key].name.common == "United Kingdom") country = "UK"
+		else if(country_dict[key].name.common == "South Korea") country = "S. Korea"
+		else if(country_dict[key].name.common == "DR Congo") country = "DRC"
+		else if(country_dict[key].name.common == "Republic of the Congo") country = "Congo"
+		else if(country_dict[key].name.common == "United Arab Emirates") country = "UAE"
+		else if(country_dict[key].name.common == "Macau") country = "Macao"
+		else country = country_dict[key].name.common
+		if(country_dict[key].region.toLowerCase() === region.toLowerCase()) res.push(country)
+	})
+
+	return res
+}
+
+find_covid_region_stat = (region, table) => {
+
+	// find the best countries 
+	countries = find_countries_region(region)	
+	console.log(countries)
+	const ascii_table_end = "+----------------+---------+--------+--------+---------+\n"
+	const ascii_table_headers = "| COUNTRY        | CASES   | +cases | DEATHS | +deaths |\n"
+	const ascii_title = "|                       COVID-19                       |\n"
+	const spaces = {
+		country: 14,
+		cases: 7,
+		d_cases: 6,
+		deaths:6,
+		d_deaths:7
+	}
+	var rows = [];
+	
+	countries.forEach( c => {
+		table.forEach( r => {
+			if(r.country.toLowerCase() === c.toLowerCase()) rows.push(r)
+		})	
+	})
+	if(countries.length === 0) return []
+	// if there is a country that matches the country, then we will use that country 
+	
+	rows = rows.sort( (r1,r2) => {
+		return Number(r2.cases.replace(',','')) - Number(r1.cases.replace(',','')) 
+	})
+	rows = rows.filter( i => rows.indexOf(i) < 10)
+		
+	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
+	rows.forEach(r => {
+
+		if(r.country.length > spaces.country) r.country = r.country.substring(0,spaces.country)
+		ascii_table += "| " 
+		ascii_table += r.country;
+		ascii_table += generate_spaces(spaces.country - r.country.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.cases;
+		ascii_table += generate_spaces(spaces.cases - r.cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.new_cases;
+		ascii_table += generate_spaces(spaces.d_cases - r.new_cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.deaths;
+		ascii_table += generate_spaces(spaces.deaths - r.deaths.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.new_deaths;
+		ascii_table += generate_spaces(spaces.d_deaths - r.new_deaths.length) + ' '
+		ascii_table += "|\n"
+	})
+	ascii_table += ascii_table_end
+	console.log(ascii_table.length)
+	return ascii_table;
+}
+
+// get two and three letter country codes
+
+find_country_2 = (cc2) => {
+	if(cc2.toLowerCase() === "uk") return "UK"
+	if(cc2.toLowerCase() === "sk") return "S. Korea"
+	if(cc2.toLowerCase() === "us") return "USA"
+	res = [] 
+	Object.keys(country_dict).forEach(key => {
+		if(country_dict[key].cca2 == "US") country = "USA"
+		else if(country_dict[key].cca2 == "GB" || cc2 == "UK") country = "UK"
+		else if(country_dict[key].cca2 == "KR" || cc2 == "SK") country = "S. Korea"
+		else if(country_dict[key].cca2 == "CD") country = "DRC"
+		else if(country_dict[key].cca2 == "CG") country = "Congo"
+		else if(country_dict[key].cca2 == "AE") country = "UAE"
+		else if(country_dict[key].cca2 == "MO") country = "Macao"
+		else country = country_dict[key].name.common
+
+		if(cc2.toLowerCase() === country_dict[key].cca2.toLowerCase()) res.push(country)
+	})
+	if(res.length > 0) return res[0]
+	if(res.length > 0) return res[0]
+	console.log(res)
+	console.log(res)
+	return null
+}
+find_country_3 = (cc2) => {
+	if(cc2.toLowerCase() === "usa") return "USA"
+	res = [] 
+	Object.keys(country_dict).forEach(key => {
+		if(country_dict[key].cc3 == "USA") country = "USA"
+		else if(country_dict[key].cca3 == "GBR") country = "UK"
+		else if(country_dict[key].cca3 == "KOR") country = "S. Korea"
+		else if(country_dict[key].cca3 == "COD") country = "DRC"
+		else if(country_dict[key].cca3 == "COG") country = "Congo"
+		else if(country_dict[key].cca3 == "ARE") country = "UAE"
+		else if(country_dict[key].cca3 == "MAC") country = "Macao"
+		else country = country_dict[key].name.common
+
+		if(cc2.toLowerCase() === country_dict[key].cca3.toLowerCase()) res.push(country)
+	})
+	if(res.length > 0) return res[0]
+	console.log(res)
+	return null
 }
 
 find_covid_country_stat = (country, table) => {
@@ -484,21 +633,25 @@ find_covid_country_stat = (country, table) => {
 	}
 	var rows;
 	// find the country 
-	
-	rows = table.sort((i,j) => {
-			res1 = evaluate_country(country,i) 
-			res2 = evaluate_country(country,j)
-			if(res1 < res2) return 1
-			else if(res1 === res2) return 0
-			else return -1
+	if(country.length == 2){
+		// 
+		country = find_country_2(country)
+		rows = table.filter(i => country === i.country)
+	}else if(country.length == 3){
+		country = find_country_3(country)
+		console.log(country)
+		rows = table.filter(i => country === i.country)
+	}else{
+		rows = table.sort((i,j) => {
+				res1 = evaluate_country(country,i) 
+				res2 = evaluate_country(country,j)
+				if(res1 < res2) return 1
+				else if(res1 === res2) return 0
+				else return -1
 		})
-	rows = rows.filter( i => rows.indexOf(i) < 2)
-
+		rows = rows.filter( i => rows.indexOf(i) < 1)
+	}
 	if(rows.length == 0) rows = table.filter(i => fastLev.get(i.country.toLowerCase(), country) < 5)
-	
-	// if there is a country that matches the country, then we will use that country 
-	
-
 	
 	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
 	rows.forEach(r => {
@@ -578,8 +731,80 @@ create_covid_ascii_table = table => {
 	console.log(ascii_table.length)
 	return ascii_table;
 }
+create_covid_mobile_table = table => {
+	rows = table.filter( i => table.indexOf(i) < 20);
+	const ascii_table_end =        "+-----+---------+--------+\n"
+	const ascii_table_middle =     "+.....+.........+........+\n"
+	const ascii_table_headers =    "| WHO | CASES   | DEATHS |\n"
+	const ascii_title =            "|        COVID-19        |\n"
+	const spaces = {
+		country: 3,
+		cases: 7,
+		deaths:6,
+		d_deaths:6,
+		d_cases: 7,
+	}
+	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
+	rows.forEach(r => {
+		if(r.country === "S. Korea") country = "South Korea"
+		else if(r.country === "USA") country = "United States"
+		else if(r.country === "UK") country = "United Kingdom"
+		else if(r.country == "Diamond Princess") country = "DP"
+		else if(r.country == "Total:") country = "ALL";
+		else country = r.country
+		// get the country code 
+		//console.log(r.country)
+		country_code = country_dict[country]
+		if(country_code) country_code = country_code.cca3
+		else{
+			country_code = country
+			console.log("NO MATCH FOR: " + country)
+		}
 
-console.log(fastLev.get('korea','s. korea'))
+		ascii_table += "| " 
+		ascii_table += country_code;
+		ascii_table += generate_spaces(spaces.country - country_code.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.cases;
+		ascii_table += generate_spaces(spaces.cases - r.cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.deaths;
+		ascii_table += generate_spaces(spaces.deaths - r.deaths.length) + ' '
+		ascii_table += "|\n"
+		ascii_table += "| " 
+		ascii_table += generate_spaces(spaces.country) + ' '
+		ascii_table += "| " 
+		ascii_table += r.new_cases;
+		ascii_table += generate_spaces(spaces.d_cases - r.new_cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.new_deaths;
+		ascii_table += generate_spaces(spaces.d_deaths - r.new_deaths.length) + ' '
+		ascii_table += "|\n"
+		ascii_table += ascii_table_end
+
+	})
+	ascii_table += ascii_table_end
+	var r = table[table.length -1]
+		ascii_table += "| " 
+		ascii_table += "ALL";
+		ascii_table += generate_spaces(spaces.country - r.country.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.cases;
+		ascii_table += generate_spaces(spaces.cases - r.cases.length) + ' '
+		ascii_table += "| " 
+		ascii_table += r.deaths;
+		ascii_table += generate_spaces(spaces.deaths - r.deaths.length) + ' '
+		ascii_table += "|\n"
+	ascii_table += ascii_table_end
+	
+	console.log(ascii_table.length)
+	return ascii_table;
+}
+		utils.getCovidOverview(res => {
+			table = create_covid_mobile_table(res)
+			//console.log(table)
+		})
+
 // when you add a memeber to the database, add them to the database 
 client.on('guildMemberAdd', member => {
 	console.log(member)
