@@ -844,7 +844,7 @@ create_covid_aus_table = table => {
 		else if(r.state === "South Australia") country = "SA"
 		else if(r.state === "Tasmania") country = "TAS"
 		else if(r.state === "Victoria") country = "VIC"
-		else if(r.state === "Total**") country = "Tota:l"
+		else if(r.state === "Total**") country = "Total:"
 		else if(r.state === "Western Australia") country = "WA"
 		else country = ".."
 
