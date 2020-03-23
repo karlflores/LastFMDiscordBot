@@ -220,6 +220,24 @@ getCovidOverview = async function(callback){
 	}
 }
 
+getAusCovidOverview = async function(callback){
+	try{
+		fetch('https://www.health.gov.au/news/health-alerts/novel-coronavirus-2019-ncov-health-alert/coronavirus-covid-19-current-situation-and-case-numbers')
+					.then( res => res.text())
+					.then(res => {
+			const $ = cheerio.load(res)
+			const result = $('table').find('tr').map((i,element) => ({
+				state: $(element).find('td:nth-of-type(1)').text().trim(),
+				cases: $(element).find('td:nth-of-type(2)').text().trim(),
+			})).get()
+
+			callback(result.filter( i => result.indexOf(i) > 0 && result.indexOf(i) < result.length - 1));
+		})
+
+	}catch(err){
+		return console.log(err);
+	}
+}
 
 module.exports = {
 	validateUsername,
@@ -229,5 +247,6 @@ module.exports = {
 	getTrackChart,
 	getImage,
 	getScrobbleNum,
-	getCovidOverview
+	getCovidOverview,
+	getAusCovidOverview
 }

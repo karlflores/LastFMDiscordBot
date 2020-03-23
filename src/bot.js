@@ -410,6 +410,15 @@ client.on('message', async msg => {
 			msg.channel.send(embed)			
 		})
 
+	} else if(msg.content.search(/.covida/) === 0){
+		console.log("finding stats....")
+		utils.getAusCovidOverview(res => {
+			table = create_covid_aus_table(res)
+			console.log(table)
+			console.log(table.length)
+			const b = '```'
+			msg.channel.send(`${b}prolog\n${table}${b}`)
+		})
 
 	} else if(msg.content.search(/.covidm/) === 0){
 		console.log("finding stats....")
@@ -470,8 +479,9 @@ client.on('message', async msg => {
 		.addField('.artists !<@user>','Get the top 10 artists for a given user [default: message sender]')
 		.addField('.setFM <lastfm_username>','Set your lastFM username to enable lastFM functionality')
 		.addField('.pix <subreddit>', 'Pull a random picture from a given subreddit')
-		.addField('.covid', 'Get the a table if the current COVID-19 statistics')
-		.addField('.covidm', 'Get the a table if the current COVID-19 statistics - suitable for mobile viewing')
+		.addField('.covid', 'Get the a table of the current COVID-19 statistics')
+		.addField('.covida', 'Get the a table of the current Australian COVID-19 (by state) statistics - suitable for mobile viewing')
+		.addField('.covidm', 'Get the a table of the current COVID-19 statistics - suitable for mobile viewing')
 		.addField('.cvc <CCA2|CCA3|COUNTRY_QUERY>', 'Get COVID-19 statistics for a specified country, can use 2/3-Letter country codes, or search for a country (some auto-correct implemented, but not guaranteed to give the correct country')
 		.addField('.cvr <REGION_QUERY>', 'Get COVID-19 statistics for a specified region [AMERICAS, OCEANIA, ASIA, EUROPE, AFRICA]')
 		msg.channel.send(embed)	
@@ -808,10 +818,50 @@ create_covid_mobile_table = table => {
 	console.log(ascii_table.length)
 	return ascii_table;
 }
-		utils.getCovidOverview(res => {
-			table = create_covid_mobile_table(res)
-			//console.log(table)
-		})
+
+create_covid_aus_table = table => {
+	const ascii_table_end =        "+-----------+---------+\n"
+	const ascii_table_headers =    "|   STATE   |  CASES  |\n"
+	const ascii_title =            "|     AUS COVID-19    |\n"
+	const spaces = {
+		state: 9,
+		cases: 7,
+	}
+	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
+	table = table.sort( (r1,r2) => {
+		return Number(r2.cases.replace(',','')) - Number(r1.cases.replace(',','')) 
+	})
+	rows = []
+	for(i=1; i < table.length ; i++){
+		rows.push(table[i])
+	}
+	rows.push(table[0])
+	rows.forEach(r => {
+		if(r.state === "Australian Capital Territory") country = "ACT"
+		else if(r.state === "New South Wales") country = "NSW"
+		else if(r.state === "Northern Territory") country = "NT"
+		else if(r.state === "Queensland") country = "QLD"
+		else if(r.state === "South Australia") country = "SA"
+		else if(r.state === "Tasmania") country = "TAS"
+		else if(r.state === "Victoria") country = "VIC"
+		else if(r.state === "Total**") country = "Tota:l"
+		else if(r.state === "Western Australia") country = "WA"
+		else country = ".."
+
+		if(country === "Total:") ascii_table += ascii_table_end
+		ascii_table += "| " 
+		ascii_table += country;
+		ascii_table += generate_spaces(spaces.state - country.length) + ' '
+		ascii_table += "| "
+		ascii_table += r.cases;
+		ascii_table += generate_spaces(spaces.cases - r.cases.length) + ' '
+		ascii_table += "|\n"
+
+	})	
+	ascii_table += ascii_table_end
+	console.log(ascii_table.length)
+	return ascii_table;
+}
 
 // when you add a memeber to the database, add them to the database 
 client.on('guildMemberAdd', member => {
