@@ -637,12 +637,12 @@ find_covid_country_stat = (country, table) => {
 		// 
 		country = find_country_2(country)
 		if(!country) rows = []
-		rows = table.filter(i => country === i.country)
+		else rows = table.filter(i => country === i.country)
 	}else if(country.length == 3){
 		country = find_country_3(country)
 		console.log(country)
 		if(!country) rows = []
-		rows = table.filter(i => country === i.country)
+		else rows = table.filter(i => country === i.country)
 	}else{
 		rows = table.sort((i,j) => {
 				res1 = evaluate_country(country,i) 
