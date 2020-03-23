@@ -859,7 +859,7 @@ create_covid_aus_table = table => {
 
 	})	
 	ascii_table += ascii_table_end
-	console.log(ascii_table.length)
+	console.log(ascii_table)
 	return ascii_table;
 }
 
