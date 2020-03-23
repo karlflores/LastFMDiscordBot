@@ -468,6 +468,10 @@ client.on('message', async msg => {
 		.addField('.npc @user','Send through the track you are currently scrobbling as well as the mentioned users scobble number for that track')
 		.addField('.setFM <lastfm_username>','Set your lastFM username to enable lastFM functionality')
 		.addField('.pix <subreddit>', 'Pull a random picture from a given subreddit')
+		.addField('.covid', 'Get the a table if the current COVID-19 statistics')
+		.addField('.covidm', 'Get the a table if the current COVID-19 statistics - suitable for mobile viewing')
+		.addField('.cvc <CCA2|CCA3|COUNTRY_QUERY>', 'Get COVID-19 statistics for a specified country, can use 2/3-Letter countrt codes, or search for a countries name (some auto-correct, but not guaranteed to give right country')
+		.addField('.cvr <REGION_QUERY>', 'Get COVID-19 statistics for a specified region [AMERICAS, OCEANIA, ASIA, EUROPE, AFRICA]')
 		msg.channel.send(embed)	
 		
 	}
