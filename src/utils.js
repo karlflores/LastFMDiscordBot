@@ -223,7 +223,11 @@ getCovidOverview = async function(callback){
 getAusCovidOverview = async function(callback){
 	try{
 		fetch('https://www.health.gov.au/news/health-alerts/novel-coronavirus-2019-ncov-health-alert/coronavirus-covid-19-current-situation-and-case-numbers')
-					.then( res => res.text())
+					.then( res => {
+							console.log(res.text())
+							return res.text()
+					
+					})
 					.then(res => {
 			const $ = cheerio.load(res)
 			const result = $('table').find('tr').map((i,element) => ({
