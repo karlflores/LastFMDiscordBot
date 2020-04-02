@@ -537,14 +537,14 @@ find_covid_region_stat = (region, table) => {
 	// find the best countries 
 	countries = find_countries_region(region)	
 	console.log(countries)
-	const ascii_table_end = "+----------------+---------+--------+--------+---------+\n"
-	const ascii_table_headers = "| COUNTRY        | CASES   | +cases | DEATHS | +deaths |\n"
-	const ascii_title = "|                       COVID-19                       |\n"
+	const ascii_table_end = "+----------------+----------+---------+---------+---------+\n"
+	const ascii_table_headers = "| COUNTRY        | CASES    | +cases  | DEATHS  | +deaths |\n"
+	const ascii_title = "|                        COVID-19                         |\n"
 	const spaces = {
 		country: 14,
-		cases: 7,
-		d_cases: 6,
-		deaths:6,
+		cases: 8,
+		d_cases: 7,
+		deaths:7,
 		d_deaths:7
 	}
 	var rows = [];
@@ -560,7 +560,7 @@ find_covid_region_stat = (region, table) => {
 	rows = rows.sort( (r1,r2) => {
 		return Number(r2.cases.replace(',','')) - Number(r1.cases.replace(',','')) 
 	})
-	rows = rows.filter( i => rows.indexOf(i) < 10)
+	rows = rows.filter( i => rows.indexOf(i) < 20)
 		
 	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
 	rows.forEach(r => {
@@ -637,14 +637,14 @@ find_covid_country_stat = (country, table) => {
 
 	// find the best countries 
 	
-	const ascii_table_end = "+----------------+---------+--------+--------+---------+\n"
-	const ascii_table_headers = "| COUNTRY        | CASES   | +cases | DEATHS | +deaths |\n"
-	const ascii_title = "|                       COVID-19                       |\n"
+	const ascii_table_end = "+----------------+----------+---------+---------+---------+\n"
+	const ascii_table_headers = "| COUNTRY        | CASES    | +cases  | DEATHS  | +deaths |\n"
+	const ascii_title = "|                        COVID-19                         |\n"
 	const spaces = {
 		country: 14,
-		cases: 7,
-		d_cases: 6,
-		deaths:6,
+		cases: 8,
+		d_cases: 7,
+		deaths:7,
 		d_deaths:7
 	}
 	var rows;
@@ -695,16 +695,21 @@ find_covid_country_stat = (country, table) => {
 	return ascii_table;
 }
 create_covid_ascii_table = table => {
-	rows = table.filter( i => table.indexOf(i) < 20);
 
-	const ascii_table_end = "+----------------+---------+--------+--------+---------+\n"
-	const ascii_table_headers = "| COUNTRY        | CASES   | +cases | DEATHS | +deaths |\n"
-	const ascii_title = "|                       COVID-19                       |\n"
+	rows = table.sort( (r1,r2) => {
+		return Number(r2.cases.replace(',','')) - Number(r1.cases.replace(',','')) 
+	})
+	var r = rows[0]
+	rows = table.filter( i => table.indexOf(i) > 0 && table.indexOf(i) < 20);
+
+	const ascii_table_end = "+----------------+----------+---------+---------+---------+\n"
+	const ascii_table_headers = "| COUNTRY        | CASES    | +cases  | DEATHS  | +deaths |\n"
+	const ascii_title = "|                        COVID-19                         |\n"
 	const spaces = {
 		country: 14,
-		cases: 7,
-		d_cases: 6,
-		deaths:6,
+		cases: 8,
+		d_cases: 7,
+		deaths:7,
 		d_deaths:7
 	}
 	var ascii_table = ascii_table_end + ascii_title + ascii_table_end + ascii_table_headers +ascii_table_end;
@@ -727,7 +732,7 @@ create_covid_ascii_table = table => {
 		ascii_table += "|\n"
 	})
 	ascii_table += ascii_table_end
-	var r = table[table.length -1]
+	//var r = table[table.length -1]
 		ascii_table += "| " 
 		ascii_table += r.country;
 		ascii_table += generate_spaces(spaces.country - r.country.length) + ' '
@@ -750,7 +755,12 @@ create_covid_ascii_table = table => {
 	return ascii_table;
 }
 create_covid_mobile_table = table => {
-	rows = table.filter( i => table.indexOf(i) < 20);
+	rows = table.sort( (r1,r2) => {
+		return Number(r2.cases.replace(',','')) - Number(r1.cases.replace(',','')) 
+	})
+	var r = rows[0]
+	rows = table.filter( i => table.indexOf(i) > 0 && table.indexOf(i) < 20);
+
 	const ascii_table_end =        "+-----+---------+--------+\n"
 	const ascii_table_middle =     "+.....+.........+........+\n"
 	const ascii_table_headers =    "| WHO | CASES   | DEATHS |\n"
@@ -802,7 +812,6 @@ create_covid_mobile_table = table => {
 
 	})
 	ascii_table += ascii_table_end
-	var r = table[table.length -1]
 		ascii_table += "| " 
 		ascii_table += "ALL";
 		ascii_table += generate_spaces(spaces.country - r.country.length) + ' '
