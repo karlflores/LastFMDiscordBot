@@ -495,6 +495,76 @@ client.on('message', async msg => {
 		.addField('.cvr <REGION_QUERY>', 'Get COVID-19 statistics for a specified region [AMERICAS, OCEANIA, ASIA, EUROPE, AFRICA]')
 		msg.channel.send(embed)	
 		
+	} else if(msg.content.search(/.collage/) === 0){
+		// create function
+		create_embed = username => {
+			command = msg.content.split(" ");
+			collage_msg = null;
+			duration = command[2]
+			error = false;
+			if(duration.search(/(7d)|(1m)|(3m)|(6m)|(12m)|(overall)/) > -1){
+				duration_dict = {
+					"7d": "7day",
+					"1m": "1month",
+					"3m": "3month",
+					"6m": "6month",
+					"12m": "12month",
+					"overall": "Overall"
+				}
+				if(command[1] == "9"){
+					collage_msg = `https://www.tapmusic.net/collage.php?user=${username}&type=${duration_dict[duration]}&size=3x3&caption=true`
+				}else if(command[1] == "16"){
+					collage_msg = `https://www.tapmusic.net/collage.php?user=${username}&type=${duration_dict[duration]}&size=4x4&caption=true`
+				}else if(command[1] == "25"){
+					collage_msg = `https://www.tapmusic.net/collage.php?user=${username}&type=${duration_dict[duration]}&size=5x5&caption=true`
+				}else{
+					error = true
+				}
+					
+			}else{
+				error = true
+			}
+			console.log("MESSAGE")
+			console.log(msg)
+			if(!error){
+				const embed = new Discord.RichEmbed()
+				.setColor(0xA81E4F)
+				.setTitle(msg.author.username+'\'s Collage')
+				.setImage(collage_msg)
+				.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
+				.setTimestamp()
+				msg.channel.send(embed)	
+			}else{
+				const embed = new Discord.RichEmbed()
+				.setColor(0xA81E4F)
+				.setTitle(msg.author.username+': Collage Error...')
+				.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
+				.setTimestamp()
+				msg.channel.send(embed)	
+			}
+		}
+		console.log("NP CALLED")
+		var firstMention = msg.mentions.users.first()
+		console.log(msg.mentions.users)
+		// if the person has mentioned a user, find the user in the DB 
+		if(firstMention){
+			const embed = new Discord.RichEmbed()
+			.setColor(0xA81E4F)
+			.setTitle(msg.author.username+': Collage Error...')
+			.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
+			.setTimestamp()
+			msg.channel.send(embed)	
+		}else{
+			// find the username in the message by finding the @tag
+			if(cache.get(msg.author.id)){
+				create_embed(cache.get(msg.author.id))
+				console.log("fetch cache item... " + cache.get(msg.author.id))
+			}else {
+				db.findUsername({_id:msg.author.id}, cache, create_embed)
+				console.log("set cache item... " + msg.author.id)
+			}
+		}
+		
 	}
 	
 })
