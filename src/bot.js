@@ -153,7 +153,7 @@ client.on('message', async msg => {
 			
 		// after we get the author track, we can get the number of scrobs for the mentioned user
 		let getMentionScrobs = function(){
-			var firstMention = msg.mentions.members.first()
+			var firstMention = msg.mentions.users.first()
 			if(!firstMention){
 				const embed = new Discord.RichEmbed()
 				.setColor(0xA81E4F)
@@ -176,7 +176,7 @@ client.on('message', async msg => {
 						.addBlankField()
 						.setImage(authorTrack.image[3]['#text'])
 						.addField(`Scrobbles: ${msg.author.username}`,`${authorTrack.scrobbles}`,true)
-						.addField(`Scrobbles: ${firstMention.user.username}`,`${res.scrobbles}`,true)
+						.addField(`Scrobbles: ${firstMention.username}`,`${res.scrobbles}`,true)
 						.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 						.setTimestamp()
 						msg.channel.send(embed)	
@@ -197,7 +197,7 @@ client.on('message', async msg => {
 								.addBlankField()
 								.setImage(authorTrack.image[3]['#text'])
 								.addField(`Scrobbles: ${msg.author.username}`,`${authorTrack.scrobbles}`,true)
-								.addField(`Scrobbles: ${firstMention.user.username}`,`${res.scrobbles}`,true)
+								.addField(`Scrobbles: ${firstMention.username}`,`${res.scrobbles}`,true)
 								.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
 								.setTimestamp()
 								msg.channel.send(embed)	
@@ -244,8 +244,8 @@ client.on('message', async msg => {
 		}
 	} else if (msg.content.search(/(\.nowplaying)/gmi)===0 || msg.content.search(/(\.np)/gmi)===0){
 		console.log("NP CALLED")
-		var firstMention = msg.mentions.members.first()
-		
+		var firstMention = msg.mentions.users.first()
+		console.log(msg.mentions.users)
 		// if the person has mentioned a user, find the user in the DB 
 		if(firstMention){
 			if(cache.get(firstMention.id)){
@@ -269,7 +269,7 @@ client.on('message', async msg => {
 		console.log(`${uid} sent message`)
 	
 	} else if(msg.content.search(/.albums/) === 0){
-		var firstMention = msg.mentions.members.first()
+		var firstMention = msg.mentions.users.first()
 		
 		// if the person has mentioned a user, find the user in the DB 
 		if(firstMention){
@@ -277,14 +277,14 @@ client.on('message', async msg => {
 				getAlbumChart(res=>{
 					albums = res.weeklyalbumchart.album
 					albums = albums.filter( i => albums.indexOf(i) < 10)
-					msg.channel.send(createAlbumChartEmbed(firstMention.user, albums))
+					msg.channel.send(createAlbumChartEmbed(firstMention, albums))
 				})(cache.get(firstMention.id))
 				
 			}else{
 				db.findUsername({_id:firstMention.id}, cache, getAlbumChart(res => {
 					albums = res.weeklyalbumchart.album
 					albums = albums.filter( i => albums.indexOf(i) < 10)
-					msg.channel.send(createAlbumChartEmbed(firstMention.user, albums))
+					msg.channel.send(createAlbumChartEmbed(firstMention, albums))
 				}))
 			}
 		}else{
@@ -308,21 +308,21 @@ client.on('message', async msg => {
 		console.log(`${uid} sent message`)
 		
 	} else if(msg.content.search(/.artists/) === 0){
-		var firstMention = msg.mentions.members.first()
+		var firstMention = msg.mentions.users.first()
 		// if the person has mentioned a user, find the user in the DB 
 		if(firstMention){
 			if(cache.get(firstMention.id)){
 				getArtistChart(res=>{
 					artists = res.weeklyartistchart.artist
 					artists = artists.filter( i => artists.indexOf(i) < 10)
-					msg.channel.send(createArtistChartEmbed(firstMention.user, artists))
+					msg.channel.send(createArtistChartEmbed(firstMention, artists))
 				})(cache.get(firstMention.id))
 				
 			}else{
 				db.findUsername({_id:firstMention.id}, cache, getArtistChart(res => {
 					artists = res.weeklyartistchart.artist
 					artists = artists.filter( i => artists.indexOf(i) < 10)
-					msg.channel.send(createArtistChartEmbed(firstMention.user, artists))
+					msg.channel.send(createArtistChartEmbed(firstMention, artists))
 				}))
 			}
 		}else{
@@ -346,21 +346,21 @@ client.on('message', async msg => {
 		console.log(`${uid} sent message`)
 
 	} else if(msg.content.search(/.tracks/) === 0){	
-		var firstMention = msg.mentions.members.first()
+		var firstMention = msg.mentions.users.first()
 		// if the person has mentioned a user, find the user in the DB 
 		if(firstMention){
 			if(cache.get(firstMention.id)){
 				getTrackChart(res=>{
 					tracks = res.weeklytrackchart.track
 					tracks = tracks.filter( i => tracks.indexOf(i) < 10)
-					msg.channel.send(createTrackChartEmbed(firstMention.user, tracks))
+					msg.channel.send(createTrackChartEmbed(firstMention, tracks))
 				})(cache.get(firstMention.id))
 				
 			}else{
 				db.findUsername({_id:firstMention.id}, cache, getTrackChart(res => {
 					tracks = res.weeklytrackchart.track
 					tracks = tracks.filter( i => tracks.indexOf(i) < 10)
-					msg.channel.send(createTrackChartEmbed(firstMention.user, tracks))
+					msg.channel.send(createTrackChartEmbed(firstMention, tracks))
 				}))
 			}
 		}else{
