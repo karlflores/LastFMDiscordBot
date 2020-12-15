@@ -391,6 +391,8 @@ client.on('message', async msg => {
 		
 		// we need to validate the username
 		utils.validateUsername(uname)(usernameUpdate(msg))
+
+
 	} else if(msg.content.search(/.pix/) === 0){
 		subreddit = msg.content.replace(/(.pix)[\s]+/gmi,'')
 		subreddit = subreddit.replace(/[\n]*/g,'')
@@ -400,14 +402,21 @@ client.on('message', async msg => {
 			if(!image){
 				return msg.channel.send("**...finna no images to share...**")
 			}
-			const embed = new Discord.RichEmbed()
-        	.setColor(0x00A2E8)
-        	.setTitle(image.data.title)
-			.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
-        	.setImage(image.data.url)
-			.setTimestamp()
+			console.log("callback called")
+			console.log(image.data.url)
+			// If the image is a moving image D:
+			if(image.data.url.search(/(.gif)|(.webm)|(.gifv)/) > -1){
+				msg.channel.send(`**${image.data.title}\n\n**${image.data.url}`)
+			}else{
+				const embed = new Discord.RichEmbed()
+				.setColor(0x00A2E8)
+				.setTitle(image.data.title)
+				.setAuthor('Juzzy','https://i.imgur.com/1DzHBNF.jpg')
+				.setImage(image.data.url)
+				.setTimestamp()
         	
-			msg.channel.send(embed)			
+			msg.channel.send(embed)	
+			}	
 		})
 
 	} else if(msg.content.search(/.covida/) === 0){

@@ -168,31 +168,35 @@ getScrobbleNum = username => track => callback => {
 	req = lastfm.request(method, options)
 	
 }
-getImage = async (subreddit, callback) => {
-	console.log('called ' + subreddit)
+getImage = (subreddit, callback) => {
+	console.log('test called ' + subreddit)
 	try{
-		const {body} = await snekfetch
-			.get('https://www.reddit.com/r/'+subreddit+ '.json?sort=top&t=day')
-			.query({limit:100});
-		
-		// filter the body so that only picture URLS are kept 
-		console.log(body)
-		if(body.data.children.length){
-			
-			// filter such that only image links are here 
-			filtered = body.data.children.filter(post => post.data.url.search(/(.jpg)|(.jpeg)|(.png)|(gif)/) > -1 )
+		snekfetch
+			.get('https://www.reddit.com/r/'+subreddit+ '.json?sort=top&t=week')
+			.query({limit:150})
+			.then(res => {
+				body = res.body
+				// filter the body so that only picture URLS are kept 
+				console.log(body)
+				if(body.data.children.length){
+					
+					// filter such that only image links are here 
+					filtered = body.data.children.filter(post => post.data.url.search(/(.jpg)|(.jpeg)|(.png)|(.gif)|(.webm)|(.gifv)|(.JPG)|(.JPEG)|(.mp4)/) > -1 )
 
-			if(filtered.length){
-				idx = Math.floor(Math.random() * filtered.length)
-				console.log(idx)
-				callback(filtered[idx])
-			
-			}else{
-				callback(null)
-			}
-		}else{
-			callback(null)
-		}
+					if(filtered.length){
+						idx = Math.floor(Math.random() * filtered.length)
+						console.log(idx)
+						callback(filtered[idx])
+					
+					}else{
+						callback(null)
+					}
+				}else{
+					callback(null)
+				}
+			})
+		
+		
 	}catch(err){
 		return console.log(err)
 	}
